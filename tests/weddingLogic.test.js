@@ -137,7 +137,7 @@ test('Zoom Virtual Mode: formatZoomCredentialsCopyText formats meeting ID and pa
   assert.equal(formatZoomCredentialsCopyText({}), '');
 });
 
-test('Zoom Virtual Mode: validateRsvpSubmission preserves optional modality when valid', () => {
+test('Zoom Virtual Mode: validateRsvpSubmission preserves optional modality and guestType for 5-column Sheets payload', () => {
   const virtualRsvp = validateRsvpSubmission({
     fullName: 'Laura Gómez',
     attending: 'yes',
@@ -151,5 +151,35 @@ test('Zoom Virtual Mode: validateRsvpSubmission preserves optional modality when
     attending: 'yes',
     wishesMessage: 'Nos conectaremos con mucha alegría',
     modality: 'virtual'
+  });
+
+  const sheetsVirtualPayload = validateRsvpSubmission({
+    fullName: '  Laura Gómez  ',
+    attending: 'yes',
+    guestType: 'Virtual (Zoom)',
+    wishesMessage: '  Bendiciones  '
+  });
+
+  assert.equal(sheetsVirtualPayload.isValid, true);
+  assert.deepEqual(sheetsVirtualPayload.normalizedPayload, {
+    fullName: 'Laura Gómez',
+    attending: 'yes',
+    guestType: 'Virtual (Zoom)',
+    wishesMessage: 'Bendiciones'
+  });
+
+  const sheetsInPersonPayload = validateRsvpSubmission({
+    fullName: 'Carlos Pérez',
+    attending: 'no',
+    guestType: 'Presencial',
+    wishesMessage: ''
+  });
+
+  assert.equal(sheetsInPersonPayload.isValid, true);
+  assert.deepEqual(sheetsInPersonPayload.normalizedPayload, {
+    fullName: 'Carlos Pérez',
+    attending: 'no',
+    guestType: 'Presencial',
+    wishesMessage: ''
   });
 });

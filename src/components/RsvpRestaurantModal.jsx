@@ -81,8 +81,8 @@ export function RsvpRestaurantModal({
     const validation = validateRsvpSubmission({
       fullName,
       attending,
-      wishesMessage,
-      modality: isVirtual ? 'virtual' : 'in-person'
+      guestType: isVirtual ? 'Virtual (Zoom)' : 'Presencial',
+      wishesMessage
     });
 
     if (!validation.isValid) {
@@ -99,7 +99,12 @@ export function RsvpRestaurantModal({
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(validation.normalizedPayload)
+          body: JSON.stringify({
+            fullName: validation.normalizedPayload.fullName,
+            attending: validation.normalizedPayload.attending,
+            guestType: validation.normalizedPayload.guestType,
+            wishesMessage: validation.normalizedPayload.wishesMessage
+          })
         });
       } catch {
         // Fallback smoothly in local/offline mode or opaque CORS responses

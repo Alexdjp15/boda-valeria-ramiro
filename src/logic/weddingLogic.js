@@ -57,11 +57,17 @@ export function validateRsvpSubmission(payload) {
     return { isValid: false, errors, normalizedPayload: null };
   }
 
+  const guestType = typeof payload.guestType === 'string' ? payload.guestType.trim() : '';
+
   const normalizedPayload = {
     fullName,
     attending,
     wishesMessage
   };
+
+  if (guestType) {
+    normalizedPayload.guestType = guestType;
+  }
 
   if (payload.modality === 'virtual' || payload.modality === 'in-person') {
     normalizedPayload.modality = payload.modality;
