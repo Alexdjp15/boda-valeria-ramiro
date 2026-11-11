@@ -79,7 +79,8 @@ export const weddingData = {
   rsvp: {
     whatsappPhoneDisplay: '313 673 0779',
     whatsappUrl: 'https://wa.me/573136730779',
-    googleAppsScriptWebhookUrl: ''
+    googleAppsScriptWebhookUrl:
+      'https://script.google.com/macros/s/AKfycbyHDWyain6FqF2kV9lbXXhkw_8FSqAAGTb_MbJlya4ZfC-mQRcEayimYHJUeH_rRLxP/exec'
   },
   zoomConfig: {
     title: 'Consejos Bíblicos Matrimoniales',

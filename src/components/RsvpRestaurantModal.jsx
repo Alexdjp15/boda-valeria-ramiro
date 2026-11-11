@@ -20,6 +20,7 @@ export function RsvpRestaurantModal({
   const [attending, setAttending] = useState('');
   const [wishesMessage, setWishesMessage] = useState('');
   const [errors, setErrors] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
@@ -75,6 +76,8 @@ export function RsvpRestaurantModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const validation = validateRsvpSubmission({
       fullName,
       attending,
@@ -90,14 +93,18 @@ export function RsvpRestaurantModal({
     setErrors([]);
 
     if (webhookUrl) {
+      setIsSubmitting(true);
       try {
         await fetch(webhookUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(validation.normalizedPayload)
         });
       } catch {
-        // Fallback smoothly in local/offline mode
+        // Fallback smoothly in local/offline mode or opaque CORS responses
+      } finally {
+        setIsSubmitting(false);
       }
     }
 
@@ -265,9 +272,10 @@ export function RsvpRestaurantModal({
 
           <button
             type="submit"
-            className="w-full min-h-[48px] py-3 rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-[0.2em] hover:bg-[#7A5B24] transition shadow-md"
+            disabled={isSubmitting}
+            className="w-full min-h-[48px] py-3 rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-[0.2em] hover:bg-[#7A5B24] disabled:opacity-60 transition shadow-md"
           >
-            Enviar Confirmación
+            {isSubmitting ? 'Enviando...' : 'Enviar Confirmación'}
           </button>
         </form>
       )}
