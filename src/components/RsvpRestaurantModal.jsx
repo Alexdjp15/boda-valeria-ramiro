@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, CheckCircle2, Check } from 'lucide-react';
-import { validateRsvpSubmission } from '../logic/weddingLogic.js';
+import {
+  validateRsvpSubmission,
+  resolveRsvpGuestType
+} from '../logic/weddingLogic.js';
 
 /**
  * Simplified RSVP Modal Dialog (RF-6).
@@ -9,12 +12,16 @@ import { validateRsvpSubmission } from '../logic/weddingLogic.js';
 export function RsvpRestaurantModal({
   isOpen,
   onClose,
+  isVirtual = false,
   deadlineLabel,
   webhookUrl,
   whatsappUrl,
-  whatsappPhoneDisplay,
-  isVirtual = false
+  whatsappPhoneDisplay
 }) {
+  const { effectiveIsVirtual, guestType } = resolveRsvpGuestType(
+    isVirtual,
+    typeof window !== 'undefined' ? window.location.search : ''
+  );
   const dialogRef = useRef(null);
   const [fullName, setFullName] = useState('');
   const [attending, setAttending] = useState('');
@@ -81,7 +88,7 @@ export function RsvpRestaurantModal({
     const validation = validateRsvpSubmission({
       fullName,
       attending,
-      guestType: isVirtual ? 'Virtual (Zoom)' : 'Presencial',
+      guestType,
       wishesMessage
     });
 
@@ -93,18 +100,21 @@ export function RsvpRestaurantModal({
     setErrors([]);
 
     if (webhookUrl) {
+      const payload = {
+        fullName: validation.normalizedPayload.fullName,
+        attending: validation.normalizedPayload.attending,
+        guestType,
+        isVirtual: effectiveIsVirtual,
+        wishesMessage: validation.normalizedPayload.wishesMessage
+      };
+
       setIsSubmitting(true);
       try {
         await fetch(webhookUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            fullName: validation.normalizedPayload.fullName,
-            attending: validation.normalizedPayload.attending,
-            guestType: validation.normalizedPayload.guestType,
-            wishesMessage: validation.normalizedPayload.wishesMessage
-          })
+          body: JSON.stringify(payload)
         });
       } catch {
         // Fallback smoothly in local/offline mode or opaque CORS responses
@@ -141,7 +151,7 @@ export function RsvpRestaurantModal({
           </h3>
           <p className="font-serif text-lg text-[#5A4B38]">
             {attending === 'yes'
-              ? isVirtual
+              ? effectiveIsVirtual
                 ? 'Hemos registrado tu asistencia a la transmisión virtual por Zoom.'
                 : 'Hemos registrado tu asistencia para nuestra celebración en Santa Marta.'
               : 'Agradecemos mucho tus buenos deseos y tu respuesta.'}
@@ -169,11 +179,13 @@ export function RsvpRestaurantModal({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4" noValidate aria-labelledby="rsvp-modal-title">
           <div className="text-center">
-            <h3 id="rsvp-modal-title" className="calligraphy-safe text-4xl">
-              Confirmar Asistencia
+            <h3 id="rsvp-modal-title" className="calligraphy-safe text-3xl sm:text-4xl">
+              {effectiveIsVirtual
+                ? 'Confirmar Asistencia (Transmisión Virtual)'
+                : 'Confirmar Asistencia'}
             </h3>
             <p className="font-serif italic text-sm text-[#7A664B]">
-              {isVirtual
+              {effectiveIsVirtual
                 ? `Transmisión vía Zoom · Confirmar antes del ${deadlineLabel}`
                 : `Por favor confirmar antes del ${deadlineLabel}`}
             </p>
@@ -214,7 +226,7 @@ export function RsvpRestaurantModal({
 
           <fieldset className="space-y-2">
             <legend className="block font-serif text-sm font-semibold mb-1.5">
-              {isVirtual
+              {effectiveIsVirtual
                 ? '¿Nos acompañarás en la transmisión virtual por Zoom?'
                 : '¿Nos acompañarás en este día especial?'}{' '}
               <span aria-hidden="true">*</span>
@@ -230,7 +242,7 @@ export function RsvpRestaurantModal({
                     : 'bg-white border-[#D4B982] text-[#3B3228] hover:bg-[#FAF4E8]'
                 }`}
               >
-                <span>{isVirtual ? 'Sí, me conectaré por Zoom' : 'Sí, asistiré'}</span>
+                <span>{effectiveIsVirtual ? 'Sí, me conectaré por Zoom' : 'Sí, asistiré'}</span>
                 {attending === 'yes' && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
               </button>
 
@@ -245,7 +257,7 @@ export function RsvpRestaurantModal({
                 }`}
               >
                 <span>
-                  {isVirtual
+                  {effectiveIsVirtual
                     ? 'No podré conectarme, pero les deseo lo mejor'
                     : 'No podré asistir, pero les deseo lo mejor'}
                 </span>
@@ -256,7 +268,7 @@ export function RsvpRestaurantModal({
 
           <div>
             <label htmlFor="rsvp-wishes" className="block font-serif text-sm font-semibold mb-1.5">
-              {isVirtual
+              {effectiveIsVirtual
                 ? 'Felicitaciones para los novios (opcional)'
                 : 'Mensaje para los novios (opcional)'}
             </label>
@@ -267,7 +279,7 @@ export function RsvpRestaurantModal({
               value={wishesMessage}
               onChange={(e) => setWishesMessage(e.target.value)}
               placeholder={
-                isVirtual
+                effectiveIsVirtual
                   ? 'Escribe tus felicitaciones y buenos deseos para Valeria & Ramiro...'
                   : 'Escribe tus buenos deseos para Valeria & Ramiro...'
               }

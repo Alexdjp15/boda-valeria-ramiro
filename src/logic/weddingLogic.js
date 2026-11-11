@@ -94,6 +94,20 @@ export function isVirtualMode(searchString) {
 }
 
 /**
+ * Resolves effective virtual modality and Google Sheets guestType label from prop or URL query params.
+ * @param {boolean|undefined} isVirtualProp
+ * @param {string} searchString - Raw window.location.search string
+ * @returns {{ effectiveIsVirtual: boolean, guestType: 'Virtual (Zoom)' | 'Presencial' }}
+ */
+export function resolveRsvpGuestType(isVirtualProp, searchString = '') {
+  const effectiveIsVirtual = Boolean(isVirtualProp) || isVirtualMode(searchString);
+  return {
+    effectiveIsVirtual,
+    guestType: effectiveIsVirtual ? 'Virtual (Zoom)' : 'Presencial'
+  };
+}
+
+/**
  * Formats Zoom meeting credentials into a clean multi-line string for clipboard copy.
  * @param {{ meetingId?: string, passcode?: string } | null | undefined} zoomConfig
  * @returns {string}

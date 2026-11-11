@@ -5,7 +5,8 @@ import {
   validateRsvpSubmission,
   calculateScratchPercentage,
   isVirtualMode,
-  formatZoomCredentialsCopyText
+  formatZoomCredentialsCopyText,
+  resolveRsvpGuestType
 } from '../src/logic/weddingLogic.js';
 
 test('RF-4: calculateCountdown returns exact days, hours, minutes and seconds before wedding', () => {
@@ -181,5 +182,28 @@ test('Zoom Virtual Mode: validateRsvpSubmission preserves optional modality and 
     attending: 'no',
     guestType: 'Presencial',
     wishesMessage: ''
+  });
+});
+
+test('Zoom Virtual Mode: resolveRsvpGuestType uses prop or falls back to URL query params', () => {
+  assert.deepEqual(resolveRsvpGuestType(true, ''), {
+    effectiveIsVirtual: true,
+    guestType: 'Virtual (Zoom)'
+  });
+  assert.deepEqual(resolveRsvpGuestType(false, '?tipo=virtual'), {
+    effectiveIsVirtual: true,
+    guestType: 'Virtual (Zoom)'
+  });
+  assert.deepEqual(resolveRsvpGuestType(false, '?mode=zoom'), {
+    effectiveIsVirtual: true,
+    guestType: 'Virtual (Zoom)'
+  });
+  assert.deepEqual(resolveRsvpGuestType(false, ''), {
+    effectiveIsVirtual: false,
+    guestType: 'Presencial'
+  });
+  assert.deepEqual(resolveRsvpGuestType(undefined, '?tipo=presencial'), {
+    effectiveIsVirtual: false,
+    guestType: 'Presencial'
   });
 });
