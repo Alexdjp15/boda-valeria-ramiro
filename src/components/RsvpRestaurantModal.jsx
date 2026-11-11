@@ -1,0 +1,276 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CheckCircle2, Check } from 'lucide-react';
+import { validateRsvpSubmission } from '../logic/weddingLogic.js';
+
+/**
+ * Simplified RSVP Modal Dialog (RF-6).
+ * Collects guest full name, two explicit attendance buttons, and optional wishes message.
+ */
+export function RsvpRestaurantModal({
+  isOpen,
+  onClose,
+  deadlineLabel,
+  webhookUrl,
+  whatsappUrl,
+  whatsappPhoneDisplay,
+  isVirtual = false
+}) {
+  const dialogRef = useRef(null);
+  const [fullName, setFullName] = useState('');
+  const [attending, setAttending] = useState('');
+  const [wishesMessage, setWishesMessage] = useState('');
+  const [errors, setErrors] = useState([]);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isOpen && !dialog.open) {
+      dialog.showModal();
+    } else if (!isOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [isOpen]);
+
+  // Fallback light-dismiss for browsers without native <dialog closedby="any">
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || 'closedBy' in HTMLDialogElement.prototype) return;
+
+    const isOutside = (e) => {
+      const rect = dialog.getBoundingClientRect();
+      return (
+        e.clientX < rect.left ||
+        e.clientX > rect.right ||
+        e.clientY < rect.top ||
+        e.clientY > rect.bottom
+      );
+    };
+
+    let pressedOutside = false;
+    const onPointerDown = (e) => {
+      pressedOutside = isOutside(e);
+    };
+    const onPointerUp = (e) => {
+      if (pressedOutside && isOutside(e)) {
+        dialog.close();
+      }
+    };
+
+    dialog.addEventListener('pointerdown', onPointerDown);
+    dialog.addEventListener('pointerup', onPointerUp);
+    return () => {
+      dialog.removeEventListener('pointerdown', onPointerDown);
+      dialog.removeEventListener('pointerup', onPointerUp);
+    };
+  }, []);
+
+  const handleSelectAttendance = (value) => {
+    setAttending(value);
+    if (errors.length > 0) {
+      setErrors([]);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validation = validateRsvpSubmission({
+      fullName,
+      attending,
+      wishesMessage,
+      modality: isVirtual ? 'virtual' : 'in-person'
+    });
+
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      return;
+    }
+
+    setErrors([]);
+
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(validation.normalizedPayload)
+        });
+      } catch {
+        // Fallback smoothly in local/offline mode
+      }
+    }
+
+    setIsSubmitted(true);
+  };
+
+  return (
+    <dialog
+      ref={dialogRef}
+      closedby="any"
+      aria-labelledby="rsvp-modal-title"
+      onClose={onClose}
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-[#FAF7F2] border border-[#D4B982] shadow-2xl p-6 sm:p-8 text-[#3B3228]"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar formulario"
+        className="absolute top-4 right-4 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-[#7E6744] hover:bg-[#EFE7DA] transition"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      {isSubmitted ? (
+        <div className="py-6 text-center space-y-4" role="status" aria-live="polite">
+          <CheckCircle2 className="w-14 h-14 text-[#9E7B3B] mx-auto" />
+          <h3 id="rsvp-modal-title" className="calligraphy-safe text-4xl">
+            ¡Gracias por Confirmar!
+          </h3>
+          <p className="font-serif text-lg text-[#5A4B38]">
+            {attending === 'yes'
+              ? isVirtual
+                ? 'Hemos registrado tu asistencia a la transmisión virtual por Zoom.'
+                : 'Hemos registrado tu asistencia para nuestra celebración en Santa Marta.'
+              : 'Agradecemos mucho tus buenos deseos y tu respuesta.'}
+          </p>
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-2.5 rounded-full border border-[#9E7B3B] text-[#9E7B3B] font-sans text-xs uppercase tracking-widest hover:bg-[#9E7B3B] hover:text-white transition"
+            >
+              WhatsApp RSVP · {whatsappPhoneDisplay || '313 673 0779'}
+            </a>
+          )}
+          <div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-2 px-8 py-2.5 min-h-[48px] rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-widest hover:bg-[#7A5B24] transition"
+            >
+              Volver a la Invitación
+            </button>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate aria-labelledby="rsvp-modal-title">
+          <div className="text-center">
+            <h3 id="rsvp-modal-title" className="calligraphy-safe text-4xl">
+              Confirmar Asistencia
+            </h3>
+            <p className="font-serif italic text-sm text-[#7A664B]">
+              {isVirtual
+                ? `Transmisión vía Zoom · Confirmar antes del ${deadlineLabel}`
+                : `Por favor confirmar antes del ${deadlineLabel}`}
+            </p>
+          </div>
+
+          {errors.length > 0 && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs space-y-1"
+            >
+              {errors.map((err, idx) => (
+                <p key={idx}>• {err}</p>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="rsvp-fullname" className="block font-serif text-sm font-semibold mb-1.5">
+              Nombre y Apellido Completo <span aria-hidden="true">*</span>
+            </label>
+            <input
+              id="rsvp-fullname"
+              name="fullName"
+              type="text"
+              autoComplete="name"
+              required
+              autoFocus
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                if (errors.length > 0) setErrors([]);
+              }}
+              placeholder="Ej. Valeria Albus Sánchez"
+              className="w-full min-h-[48px] px-3.5 py-2.5 rounded-lg border border-[#D4B982] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E7B3B]"
+            />
+          </div>
+
+          <fieldset className="space-y-2">
+            <legend className="block font-serif text-sm font-semibold mb-1.5">
+              {isVirtual
+                ? '¿Nos acompañarás en la transmisión virtual por Zoom?'
+                : '¿Nos acompañarás en este día especial?'}{' '}
+              <span aria-hidden="true">*</span>
+            </legend>
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                aria-pressed={attending === 'yes'}
+                onClick={() => handleSelectAttendance('yes')}
+                className={`w-full min-h-[48px] px-4 py-3 rounded-xl border text-left font-serif text-base flex items-center justify-between transition ${
+                  attending === 'yes'
+                    ? 'bg-[#9E7B3B] border-[#9E7B3B] text-white shadow-sm font-semibold'
+                    : 'bg-white border-[#D4B982] text-[#3B3228] hover:bg-[#FAF4E8]'
+                }`}
+              >
+                <span>{isVirtual ? 'Sí, me conectaré por Zoom' : 'Sí, asistiré'}</span>
+                {attending === 'yes' && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={attending === 'no'}
+                onClick={() => handleSelectAttendance('no')}
+                className={`w-full min-h-[48px] px-4 py-3 rounded-xl border text-left font-serif text-base flex items-center justify-between transition ${
+                  attending === 'no'
+                    ? 'bg-[#9E7B3B] border-[#9E7B3B] text-white shadow-sm font-semibold'
+                    : 'bg-white border-[#D4B982] text-[#3B3228] hover:bg-[#FAF4E8]'
+                }`}
+              >
+                <span>
+                  {isVirtual
+                    ? 'No podré conectarme, pero les deseo lo mejor'
+                    : 'No podré asistir, pero les deseo lo mejor'}
+                </span>
+                {attending === 'no' && <Check className="w-4 h-4 shrink-0" aria-hidden="true" />}
+              </button>
+            </div>
+          </fieldset>
+
+          <div>
+            <label htmlFor="rsvp-wishes" className="block font-serif text-sm font-semibold mb-1.5">
+              {isVirtual
+                ? 'Felicitaciones para los novios (opcional)'
+                : 'Mensaje para los novios (opcional)'}
+            </label>
+            <textarea
+              id="rsvp-wishes"
+              name="wishesMessage"
+              rows={3}
+              value={wishesMessage}
+              onChange={(e) => setWishesMessage(e.target.value)}
+              placeholder={
+                isVirtual
+                  ? 'Escribe tus felicitaciones y buenos deseos para Valeria & Ramiro...'
+                  : 'Escribe tus buenos deseos para Valeria & Ramiro...'
+              }
+              className="w-full px-3.5 py-2.5 rounded-lg border border-[#D4B982] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E7B3B]"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full min-h-[48px] py-3 rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-[0.2em] hover:bg-[#7A5B24] transition shadow-md"
+          >
+            Enviar Confirmación
+          </button>
+        </form>
+      )}
+    </dialog>
+  );
+}
