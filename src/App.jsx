@@ -529,7 +529,7 @@ export function App() {
                 Confirma tu Asistencia
               </h2>
               <p className="font-serif italic text-base text-[#6E5D47] mb-6">
-                Antes del {activeRsvpDeadlineLabel}
+                Hasta el {activeRsvpDeadlineLabel}
               </p>
 
               <div className="flex flex-col items-center gap-3 mb-12">

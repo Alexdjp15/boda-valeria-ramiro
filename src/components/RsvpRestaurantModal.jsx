@@ -186,8 +186,8 @@ export function RsvpRestaurantModal({
             </h3>
             <p className="font-serif italic text-sm text-[#7A664B]">
               {effectiveIsVirtual
-                ? `Transmisión vía Zoom · Confirmar antes del ${deadlineLabel}`
-                : `Por favor confirmar antes del ${deadlineLabel}`}
+                ? `Transmisión vía Zoom · Confirmar hasta el ${deadlineLabel}`
+                : `Por favor confirmar hasta el ${deadlineLabel}`}
             </p>
           </div>
 

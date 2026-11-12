@@ -25,7 +25,7 @@ export const weddingData = {
     timeLabel: 'A LAS 5:00 P.M.',
     yearNumber: '2026',
     cityLocation: 'Santa Marta, Colombia',
-    rsvpDeadlineLabel: '20 de Noviembre de 2026'
+    rsvpDeadlineLabel: '16 de Noviembre de 2026'
   },
   assets: {
     floralBackgroundUrl: '/assets/bg-floral-original.png',

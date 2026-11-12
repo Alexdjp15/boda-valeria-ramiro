@@ -7,7 +7,7 @@ Memoria del proyecto entre sesiones. Máximo ~50 líneas.
 - **Tests unitarios (`node --test`)**: `12/12` pruebas en verde en `tests/weddingLogic.test.js` y `tests/sanity.test.js` (`0` fallos).
 - **Build de producción (`npm run build`)**: Compilación limpia con Vite v5.4.21 (`0` errores).
 - **Modalidades por URL (`getInvitationModality`)**:
-  * Presencial completa (`/`): Salón del Reino + Recepción Punta Brava, Código de Vestimenta (solo Damas y Caballeros, sin *"Estilo Formal"*), RSVP hasta `20 de Noviembre de 2026` (`guestType: 'Presencial'`).
+  * Presencial completa (`/`): Salón del Reino + Recepción Punta Brava, Código de Vestimenta (solo Damas y Caballeros, sin *"Estilo Formal"*), RSVP `"Hasta el 16 de Noviembre de 2026"` (`guestType: 'Presencial'`).
   * Virtual Zoom (`?tipo=virtual` | `?mode=zoom`): Tarjeta Zoom debajo de la fecha, *"Consejos Bíblicos"* como título de sección sin hora repetida, sin aviso extra en Hero, sin Código de Vestimenta y sin sección/modal de Confirmar Asistencia.
   * Solo Salón del Reino (`?tipo=ceremonia` | `?tipo=salon`): Solo Salón del Reino (sin Punta Brava), sin Cronograma del Día ni Código de Vestimenta, y RSVP hasta `16 de Noviembre de 2026` (`guestType: 'Salón del Reino'`).
 - **RSVP Google Sheets y Audio Oficial**: Endpoint `rsvp.googleAppsScriptWebhookUrl` en `src/config/weddingData.js`, envío `POST` (`mode: 'no-cors'`) desde `RsvpRestaurantModal.jsx`, y pista oficial `public/assets/wedding-song.mp3`.
