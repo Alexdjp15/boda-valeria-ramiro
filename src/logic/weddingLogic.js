@@ -81,29 +81,56 @@ export function validateRsvpSubmission(payload) {
 }
 
 /**
+ * Determines the invitation modality based on URL query parameters.
+ * @param {string} searchString - Raw window.location.search string
+ * @returns {'virtual' | 'ceremony' | 'full'}
+ */
+export function getInvitationModality(searchString) {
+  if (typeof searchString !== 'string' || !searchString) {
+    return 'full';
+  }
+  const params = new URLSearchParams(searchString);
+  const tipo = params.get('tipo');
+  const mode = params.get('mode');
+
+  if (tipo === 'virtual' || mode === 'zoom') {
+    return 'virtual';
+  }
+  if (tipo === 'ceremonia' || tipo === 'salon') {
+    return 'ceremony';
+  }
+  return 'full';
+}
+
+/**
  * Determines whether virtual (Zoom) mode is active based on URL query parameters.
  * @param {string} searchString - Raw window.location.search string
  * @returns {boolean}
  */
 export function isVirtualMode(searchString) {
-  if (typeof searchString !== 'string' || !searchString) {
-    return false;
-  }
-  const params = new URLSearchParams(searchString);
-  return params.get('tipo') === 'virtual' || params.get('mode') === 'zoom';
+  return getInvitationModality(searchString) === 'virtual';
 }
 
 /**
  * Resolves effective virtual modality and Google Sheets guestType label from prop or URL query params.
  * @param {boolean|undefined} isVirtualProp
  * @param {string} searchString - Raw window.location.search string
- * @returns {{ effectiveIsVirtual: boolean, guestType: 'Virtual (Zoom)' | 'Presencial' }}
+ * @returns {{ effectiveIsVirtual: boolean, guestType: 'Virtual (Zoom)' | 'Salón del Reino' | 'Presencial' }}
  */
 export function resolveRsvpGuestType(isVirtualProp, searchString = '') {
-  const effectiveIsVirtual = Boolean(isVirtualProp) || isVirtualMode(searchString);
+  const urlModality = getInvitationModality(searchString);
+  const effectiveIsVirtual = Boolean(isVirtualProp) || urlModality === 'virtual';
+
+  let guestType = 'Presencial';
+  if (effectiveIsVirtual) {
+    guestType = 'Virtual (Zoom)';
+  } else if (urlModality === 'ceremony') {
+    guestType = 'Salón del Reino';
+  }
+
   return {
     effectiveIsVirtual,
-    guestType: effectiveIsVirtual ? 'Virtual (Zoom)' : 'Presencial'
+    guestType
   };
 }
 

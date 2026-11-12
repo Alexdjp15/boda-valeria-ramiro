@@ -16,7 +16,7 @@ import {
 import { weddingData } from './config/weddingData.js';
 import {
   calculateCountdown,
-  isVirtualMode,
+  getInvitationModality,
   formatZoomCredentialsCopyText
 } from './logic/weddingLogic.js';
 import { EnvelopeIntroOverlay } from './components/EnvelopeIntroOverlay.jsx';
@@ -44,8 +44,13 @@ function legacyCopyText(text) {
 }
 
 export function App() {
-  const isVirtual =
-    typeof window !== 'undefined' && isVirtualMode(window.location.search);
+  const modality =
+    typeof window !== 'undefined' ? getInvitationModality(window.location.search) : 'full';
+  const isVirtual = modality === 'virtual';
+  const isCeremonyOnly = modality === 'ceremony';
+  const activeRsvpDeadlineLabel = isCeremonyOnly
+    ? weddingData.ceremonyOnlyConfig.rsvpDeadlineLabel
+    : weddingData.eventDate.rsvpDeadlineLabel;
   const [countdown, setCountdown] = useState(() =>
     calculateCountdown(weddingData.eventDate.isoTargetDate, new Date())
   );
@@ -114,7 +119,9 @@ export function App() {
 
   const scheduleItems = isVirtual
     ? weddingData.zoomConfig.scheduleItems
-    : weddingData.schedule.items;
+    : isCeremonyOnly
+      ? weddingData.ceremonyOnlyConfig.scheduleItems
+      : weddingData.schedule.items;
 
   const handleEnvelopeOpened = () => {
     if (audioRef.current) {
@@ -212,12 +219,6 @@ export function App() {
               </p>
             </div>
 
-            {isVirtual && (
-              <p className="font-serif text-sm sm:text-base text-[#4B3F30] bg-white/80 border border-[#D4B982]/55 rounded-xl px-4 py-3 max-w-xs mx-auto leading-relaxed shadow-sm">
-                {weddingData.zoomConfig.heroNotice}
-              </p>
-            )}
-
             <blockquote className="font-serif italic text-xs sm:text-sm text-[#665949] max-w-xs mx-auto leading-relaxed px-2">
               {weddingData.couple.biblicalQuote}{' '}
               <span className="not-italic font-semibold">
@@ -244,7 +245,7 @@ export function App() {
             <p className="font-sans text-xs tracking-[0.25em] text-[#6E5D47]">
               {weddingData.eventDate.dayName}
             </p>
-            <p className="font-sans font-light tracking-tight text-6xl text-[#3B3228] py-1">
+            <p className="font-sans font-light tracking-tight text-6xl text-[#9E7B3B] py-1">
               {weddingData.eventDate.dayNumber}
             </p>
             <p className="font-sans text-xs tracking-[0.2em] text-[#6E5D47]">
@@ -353,7 +354,9 @@ export function App() {
         {/* SECTION 3: CEREMONY & RESTAURANT VENUES IN SANTA MARTA */}
         <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 overflow-visible">
           <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-1">
-            {isVirtual ? 'Ceremonia en Santa Marta' : weddingData.venues.sectionTitle}
+            {isVirtual || isCeremonyOnly
+              ? weddingData.venues.ceremony.title
+              : weddingData.venues.sectionTitle}
           </h2>
           <p className="font-serif italic text-base text-[#6E5D47] mb-10">
             {isVirtual
@@ -386,9 +389,11 @@ export function App() {
                   </div>
                 )}
               </div>
-              <h3 className="calligraphy-safe text-3xl sm:text-4xl">
-                {weddingData.venues.ceremony.title}
-              </h3>
+              {!isVirtual && !isCeremonyOnly && (
+                <h3 className="calligraphy-safe text-3xl sm:text-4xl">
+                  {weddingData.venues.ceremony.title}
+                </h3>
+              )}
               <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#6E5D47]">
                 {weddingData.venues.ceremony.placePretext}{' '}
                 <strong className="font-semibold text-[#3B3228] block mt-1 text-sm">
@@ -397,8 +402,8 @@ export function App() {
               </p>
               <p className="font-serif text-sm text-[#6E5D47]">
                 {isVirtual
-                  ? `${weddingData.zoomConfig.city} · ${weddingData.venues.ceremony.timeLabel}`
-                  : `${weddingData.venues.ceremony.addressLine} · ${weddingData.venues.ceremony.timeLabel}`}
+                  ? weddingData.zoomConfig.city
+                  : weddingData.venues.ceremony.addressLine}
               </p>
               {!isVirtual && (
                 <a
@@ -413,8 +418,8 @@ export function App() {
               )}
             </div>
 
-            {/* Restaurant Reception Card - Hidden in Virtual Mode */}
-            {!isVirtual && (
+            {/* Restaurant Reception Card - Only in Full Presencial Mode */}
+            {!isVirtual && !isCeremonyOnly && (
               <div className="space-y-4 pt-4">
                 <div className="w-full flex items-center justify-center">
                   {!restaurantImgError ? (
@@ -493,57 +498,65 @@ export function App() {
           </div>
         </section>
 
-        {/* SECTION 5: DRESS CODE */}
-        <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 bg-[#FAF7F2]/80 overflow-visible">
-          <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-2">
-            {weddingData.dressCode.sectionTitle}
-          </h2>
-          <p className="font-serif italic text-base text-[#6E5D47] mb-6">
-            {weddingData.dressCode.subtitle}
-          </p>
-
-          <div className="max-w-xs mx-auto p-5 rounded-2xl bg-white/95 border border-[#DEC9A4] shadow-sm space-y-1.5">
-            <h3 className="font-serif font-bold text-lg text-[#8A682D]">
-              {weddingData.dressCode.styleTitle}
-            </h3>
-            <p className="font-serif font-semibold text-sm text-[#4A3F32]">
-              {weddingData.dressCode.ladiesLabel}
+        {/* SECTION 5: DRESS CODE (Hidden in Virtual Mode) */}
+        {!isVirtual && (
+          <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 bg-[#FAF7F2]/80 overflow-visible">
+            <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-2">
+              {weddingData.dressCode.sectionTitle}
+            </h2>
+            <p className="font-serif italic text-base text-[#6E5D47] mb-6">
+              {weddingData.dressCode.subtitle}
             </p>
-            <p className="font-serif font-semibold text-sm text-[#4A3F32]">
-              {weddingData.dressCode.gentlemenLabel}
-            </p>
-          </div>
-        </section>
 
-        {/* SECTION 6: RSVP CONFIRMATION FOOTER */}
+            <div className="max-w-xs mx-auto p-5 rounded-2xl bg-white/95 border border-[#DEC9A4] shadow-sm space-y-1.5">
+              <h3 className="font-serif font-bold text-lg text-[#8A682D]">
+                {weddingData.dressCode.styleTitle}
+              </h3>
+              <p className="font-serif font-semibold text-sm text-[#4A3F32]">
+                {weddingData.dressCode.ladiesLabel}
+              </p>
+              <p className="font-serif font-semibold text-sm text-[#4A3F32]">
+                {weddingData.dressCode.gentlemenLabel}
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* SECTION 6: RSVP CONFIRMATION & SIGNATURE FOOTER */}
         <section className="relative z-20 py-16 px-6 text-center border-t border-[#E6DAC3]/60 overflow-visible">
-          <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-2">
-            Confirma tu Asistencia
-          </h2>
-          <p className="font-serif italic text-base text-[#6E5D47] mb-6">
-            Antes del {weddingData.eventDate.rsvpDeadlineLabel}
-          </p>
+          {!isVirtual && (
+            <>
+              <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-2">
+                Confirma tu Asistencia
+              </h2>
+              <p className="font-serif italic text-base text-[#6E5D47] mb-6">
+                Antes del {activeRsvpDeadlineLabel}
+              </p>
 
-          <div className="flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsRsvpOpen(true)}
-              className="px-10 py-3.5 rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-[0.25em] shadow-lg hover:bg-[#7A5B24] transition"
-            >
-              Confirmar Asistencia
-            </button>
+              <div className="flex flex-col items-center gap-3 mb-12">
+                <button
+                  type="button"
+                  onClick={() => setIsRsvpOpen(true)}
+                  className="px-10 py-3.5 rounded-full bg-[#9E7B3B] text-white font-sans text-xs uppercase tracking-[0.25em] shadow-lg hover:bg-[#7A5B24] transition"
+                >
+                  Confirmar Asistencia
+                </button>
 
-            <a
-              href={weddingData.rsvp.whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-7 py-2.5 rounded-full border border-[#9E7B3B] text-[#9E7B3B] font-sans text-xs uppercase tracking-[0.18em] hover:bg-[#9E7B3B] hover:text-white transition"
-            >
-              WhatsApp · {weddingData.rsvp.whatsappPhoneDisplay}
-            </a>
-          </div>
+                <a
+                  href={weddingData.rsvp.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-7 py-2.5 rounded-full border border-[#9E7B3B] text-[#9E7B3B] font-sans text-xs uppercase tracking-[0.18em] hover:bg-[#9E7B3B] hover:text-white transition"
+                >
+                  WhatsApp · {weddingData.rsvp.whatsappPhoneDisplay}
+                </a>
+              </div>
+            </>
+          )}
 
-          <div className="mt-12 pt-6 border-t border-[#E6DAC3]/50 space-y-2 overflow-visible">
+          <div
+            className={`${!isVirtual ? 'pt-6 border-t border-[#E6DAC3]/50' : ''} space-y-2 overflow-visible`}
+          >
             <p className="calligraphy-safe text-3xl">
               {weddingData.couple.brideFullName.split(' ')[0]} &amp;{' '}
               {weddingData.couple.groomFullName.split(' ')[0]}
@@ -556,15 +569,17 @@ export function App() {
       </main>
 
       {/* RSVP Modal */}
-      <RsvpRestaurantModal
-        isOpen={isRsvpOpen}
-        onClose={() => setIsRsvpOpen(false)}
-        deadlineLabel={weddingData.eventDate.rsvpDeadlineLabel}
-        webhookUrl={weddingData.rsvp.googleAppsScriptWebhookUrl}
-        whatsappUrl={weddingData.rsvp.whatsappUrl}
-        whatsappPhoneDisplay={weddingData.rsvp.whatsappPhoneDisplay}
-        isVirtual={isVirtual}
-      />
+      {!isVirtual && (
+        <RsvpRestaurantModal
+          isOpen={isRsvpOpen}
+          onClose={() => setIsRsvpOpen(false)}
+          deadlineLabel={activeRsvpDeadlineLabel}
+          webhookUrl={weddingData.rsvp.googleAppsScriptWebhookUrl}
+          whatsappUrl={weddingData.rsvp.whatsappUrl}
+          whatsappPhoneDisplay={weddingData.rsvp.whatsappPhoneDisplay}
+          isVirtual={isVirtual}
+        />
+      )}
     </div>
   );
 }

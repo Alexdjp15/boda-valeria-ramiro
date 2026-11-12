@@ -106,5 +106,13 @@ export const weddingData = {
         iconName: 'Heart'
       }
     ]
+  },
+  ceremonyOnlyConfig: {
+    rsvpDeadlineLabel: '16 de Noviembre de 2026',
+    sectionTitle: 'Consejos Bíblicos',
+    sectionSubtitle: 'Todo lo que necesitas saber para acompañarnos',
+    scheduleItems: [
+      { id: 'ceremony', time: '05:00 PM', title: 'Consejos Bíblicos', iconName: 'Heart' }
+    ]
   }
 };

@@ -65,15 +65,8 @@ export function EnvelopeIntroOverlay({
         <div className="pointer-events-none absolute inset-4 sm:inset-7 border border-[#C5A567]/40 rounded-sm" />
         <div className="pointer-events-none absolute inset-6 sm:inset-9 border border-[#C5A567]/20 rounded-sm" />
 
-        {/* Subtle lateral flap union crease line */}
-        <div className="pointer-events-none absolute top-0 bottom-0 left-1/2 -translate-x-1/2 border-r border-[#C8BFB0]/60" />
-
-        {/* Top Header Label */}
-        <div className="relative z-10 text-center pt-4">
-          <p className="font-serif text-xs sm:text-sm tracking-[0.3em] uppercase text-[#7E6744]">
-            Invitación Exclusiva
-          </p>
-        </div>
+        {/* Top balance spacer */}
+        <div className="pt-4" aria-hidden="true" />
 
         {/* Center Physical Wax Seal Button (Strictly Centered on Vertical Axis, Only Italic Prompt Below) */}
         <div className="relative z-20 flex flex-col items-center justify-center my-auto">

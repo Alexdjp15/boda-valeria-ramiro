@@ -5,6 +5,7 @@ import {
   validateRsvpSubmission,
   calculateScratchPercentage,
   isVirtualMode,
+  getInvitationModality,
   formatZoomCredentialsCopyText,
   resolveRsvpGuestType
 } from '../src/logic/weddingLogic.js';
@@ -206,4 +207,24 @@ test('Zoom Virtual Mode: resolveRsvpGuestType uses prop or falls back to URL que
     effectiveIsVirtual: false,
     guestType: 'Presencial'
   });
+  assert.deepEqual(resolveRsvpGuestType(false, '?tipo=ceremonia'), {
+    effectiveIsVirtual: false,
+    guestType: 'Salón del Reino'
+  });
+  assert.deepEqual(resolveRsvpGuestType(false, '?tipo=salon'), {
+    effectiveIsVirtual: false,
+    guestType: 'Salón del Reino'
+  });
+});
+
+test('Invitation Modality: getInvitationModality detects virtual, ceremony, and full modes accurately', () => {
+  assert.equal(getInvitationModality('?tipo=virtual'), 'virtual');
+  assert.equal(getInvitationModality('?mode=zoom'), 'virtual');
+  assert.equal(getInvitationModality('?tipo=ceremonia'), 'ceremony');
+  assert.equal(getInvitationModality('?tipo=salon'), 'ceremony');
+  assert.equal(getInvitationModality('?guest=ana&tipo=salon'), 'ceremony');
+  assert.equal(getInvitationModality(''), 'full');
+  assert.equal(getInvitationModality('?tipo=presencial'), 'full');
+  assert.equal(getInvitationModality(null), 'full');
+  assert.equal(getInvitationModality(undefined), 'full');
 });
