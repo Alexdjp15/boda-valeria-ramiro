@@ -396,7 +396,7 @@ export function App() {
               )}
               <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#6E5D47]">
                 {weddingData.venues.ceremony.placePretext}{' '}
-                <strong className="font-semibold text-[#3B3228] block mt-1 text-sm">
+                <strong className="font-semibold text-[#9E7B3B] block mt-1 text-sm">
                   {weddingData.venues.ceremony.venueName}
                 </strong>
               </p>
@@ -448,7 +448,7 @@ export function App() {
                 </h3>
                 <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#6E5D47]">
                   {weddingData.venues.reception.placePretext}{' '}
-                  <strong className="font-semibold text-[#3B3228] block mt-1 text-sm">
+                  <strong className="font-semibold text-[#9E7B3B] block mt-1 text-sm">
                     {weddingData.venues.reception.venueName}
                   </strong>
                 </p>
@@ -469,37 +469,39 @@ export function App() {
           </div>
         </section>
 
-        {/* SECTION 4: DAY SCHEDULE TIMELINE */}
-        <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 bg-[#FAF7F2]/80 overflow-visible">
-          <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-8">
-            {weddingData.schedule.sectionTitle}
-          </h2>
+        {/* SECTION 4: DAY SCHEDULE TIMELINE (Hidden in Ceremony-Only Mode) */}
+        {!isCeremonyOnly && (
+          <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 bg-[#FAF7F2]/80 overflow-visible">
+            <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-8">
+              {weddingData.schedule.sectionTitle}
+            </h2>
 
-          <div className="relative max-w-xs mx-auto space-y-6 before:absolute before:top-4 before:bottom-4 before:left-1/2 before:-translate-x-1/2 before:w-[1px] before:bg-[#D4B982]">
-            {scheduleItems.map((item) => {
-              const IconComponent = SCHEDULE_ICONS[item.iconName] || Calendar;
-              return (
-                <div
-                  key={item.id}
-                  className="relative z-10 flex flex-col items-center bg-white/95 py-3 px-5 rounded-xl border border-[#E5D5B5] shadow-sm max-w-[230px] mx-auto"
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#F5EFE2] border border-[#C8A96B] flex items-center justify-center text-[#9E7B3B] mb-1">
-                    <IconComponent className="w-4 h-4" />
+            <div className="relative max-w-xs mx-auto space-y-6 before:absolute before:top-4 before:bottom-4 before:left-1/2 before:-translate-x-1/2 before:w-[1px] before:bg-[#D4B982]">
+              {scheduleItems.map((item) => {
+                const IconComponent = SCHEDULE_ICONS[item.iconName] || Calendar;
+                return (
+                  <div
+                    key={item.id}
+                    className="relative z-10 flex flex-col items-center bg-white/95 py-3 px-5 rounded-xl border border-[#E5D5B5] shadow-sm max-w-[230px] mx-auto"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#F5EFE2] border border-[#C8A96B] flex items-center justify-center text-[#9E7B3B] mb-1">
+                      <IconComponent className="w-4 h-4" />
+                    </div>
+                    <span className="font-sans text-[11px] font-semibold tracking-[0.2em] text-[#9E7B3B]">
+                      {item.time}
+                    </span>
+                    <span className="font-serif font-semibold text-lg text-[#3B3228]">
+                      {item.title}
+                    </span>
                   </div>
-                  <span className="font-sans text-[11px] font-semibold tracking-[0.2em] text-[#9E7B3B]">
-                    {item.time}
-                  </span>
-                  <span className="font-serif font-semibold text-lg text-[#3B3228]">
-                    {item.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-        {/* SECTION 5: DRESS CODE (Hidden in Virtual Mode) */}
-        {!isVirtual && (
+        {/* SECTION 5: DRESS CODE (Hidden in Virtual and Ceremony-Only Modes) */}
+        {!isVirtual && !isCeremonyOnly && (
           <section className="relative z-20 py-14 px-6 text-center border-t border-[#E6DAC3]/60 bg-[#FAF7F2]/80 overflow-visible">
             <h2 className="calligraphy-safe text-4xl sm:text-5xl mb-2">
               {weddingData.dressCode.sectionTitle}

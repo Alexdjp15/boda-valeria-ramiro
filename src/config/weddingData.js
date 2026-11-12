@@ -40,7 +40,7 @@ export const weddingData = {
     sectionSubtitle: 'Todo lo que necesitas saber para acompañarnos',
     ceremony: {
       title: 'Consejos Bíblicos',
-      placePretext: 'LOS CONSEJOS BÍBLICOS TENDRÁN LUGAR EN',
+      placePretext: 'TENDRÁN LUGAR EN',
       venueName: 'Salón del Reino de Los Testigos de Jehová',
       addressLine: 'Cl. 21 No. 3 A-34 Rodadero Sur',
       timeLabel: '5:00 P.M.',
@@ -50,7 +50,7 @@ export const weddingData = {
     reception: {
       title: 'Recepción',
       placePretext: 'CELEBRAREMOS JUNTOS EN',
-      venueName: 'Punta Brava Techo Verde',
+      venueName: 'Punta Brava',
       addressLine: 'Cra. 4 No. 6-01 Rodadero',
       timeLabel: '7:00 P.M.',
       mapsUrl:
@@ -64,7 +64,7 @@ export const weddingData = {
       {
         id: 'reception',
         time: '07:00 PM',
-        title: 'Recepción en Punta Brava Techo Verde',
+        title: 'Recepción en Punta Brava',
         iconName: 'Utensils'
       }
     ]

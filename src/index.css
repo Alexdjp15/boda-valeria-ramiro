@@ -35,10 +35,6 @@
   transform: rotateY(-165deg);
 }
 
-.wax-seal-shadow {
-  filter: drop-shadow(0 12px 24px rgba(60, 45, 20, 0.45));
-}
-
 /* Native Modal Dialog Scroll Containment */
 dialog:modal {
   overscroll-behavior: contain;

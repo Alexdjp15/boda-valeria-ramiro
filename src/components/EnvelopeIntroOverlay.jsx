@@ -74,16 +74,18 @@ export function EnvelopeIntroOverlay({
             type="button"
             onClick={handleSealClick}
             aria-label="Toca el sello para abrir"
-            className="group relative flex items-center justify-center w-32 h-32 sm:w-36 sm:h-36 rounded-full focus:outline-none transition-transform duration-500 hover:scale-105 active:scale-95"
+            className="group relative flex items-center justify-center w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-transparent focus:outline-none transition-transform duration-500 hover:scale-105 active:scale-95"
+            style={{
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             <img
               src={sealImgSrc}
               alt={`Sello de lacre ${monogram}`}
               onError={handleSealImageError}
-              className="w-32 h-32 sm:w-36 sm:h-36 object-contain rounded-full wax-seal-shadow select-none pointer-events-none"
-              style={{
-                filter: 'drop-shadow(0 12px 24px rgba(60, 45, 20, 0.45))'
-              }}
+              loading="eager"
+              decoding="sync"
+              className="w-32 h-32 sm:w-36 sm:h-36 object-contain rounded-full select-none pointer-events-none"
             />
           </button>
 
