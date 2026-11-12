@@ -72,7 +72,6 @@ export const weddingData = {
   dressCode: {
     sectionTitle: 'Código de Vestimenta',
     subtitle: 'Una velada elegante junto al mar Caribe',
-    styleTitle: 'Estilo Formal',
     ladiesLabel: 'Damas: Vestido Largo',
     gentlemenLabel: 'Caballeros: Traje y Corbata'
   },

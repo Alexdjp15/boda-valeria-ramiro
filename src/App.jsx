@@ -511,9 +511,6 @@ export function App() {
             </p>
 
             <div className="max-w-xs mx-auto p-5 rounded-2xl bg-white/95 border border-[#DEC9A4] shadow-sm space-y-1.5">
-              <h3 className="font-serif font-bold text-lg text-[#8A682D]">
-                {weddingData.dressCode.styleTitle}
-              </h3>
               <p className="font-serif font-semibold text-sm text-[#4A3F32]">
                 {weddingData.dressCode.ladiesLabel}
               </p>
