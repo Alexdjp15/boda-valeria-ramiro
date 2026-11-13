@@ -13,7 +13,7 @@ Memoria del proyecto entre sesiones. Máximo ~50 líneas.
 - **Modalidades por URL y verificación móvil (`375x812 px` en Chrome DevTools)**:
   * Presencial completa (`/`, `/boda-1..4`): Salón + Punta Brava, Cronograma, Vestimenta y RSVP con 1 a 4 cupos táctiles (`guestType: 'Presencial'`).
   * Solo Salón (`/salon-1..3`): Salón del Reino con 1 a 3 cupos táctiles (`guestType: 'Salón del Reino'`), ocultando recepción, cronograma y vestimenta.
-  * Virtual Zoom (`/?tipo=virtual` | `?mode=zoom`): credenciales de Zoom intactas, sin vestimenta ni sección RSVP físico.
+  * Virtual Zoom (`/?tipo=virtual` | `?mode=zoom`): subtítulo *"Transmisión en vivo desde Zoom"*, tarjeta Zoom sin horario repetido `4:30 - 6:15`, sin vestimenta ni sección RSVP físico.
   * Cero (`0`) errores en consola y ancho móvil exacto (`scrollWidth === 375`).
 
 ## Decisiones arquitectónicas

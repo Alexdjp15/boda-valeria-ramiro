@@ -86,7 +86,6 @@ export const weddingData = {
     meetingUrl: 'https://jworg.zoom.us/j/89805963404',
     meetingId: '898 0596 3404',
     passcode: '111226',
-    timeScheduleLabel: '4:30 PM - 6:15 PM',
     ceremonyStartTime: '5:00 P.M.',
     placePretext: 'DESDE EL',
     venueName: 'Salón del Reino de Los Testigos de Jehová',

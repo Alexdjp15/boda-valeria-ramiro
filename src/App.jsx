@@ -272,9 +272,6 @@ export function App() {
                 <p className="font-serif italic text-sm text-[#6E5D47]">
                   {weddingData.zoomConfig.title}
                 </p>
-                <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#9E7B3B] font-semibold">
-                  {weddingData.zoomConfig.timeScheduleLabel}
-                </p>
               </div>
 
               <div className="rounded-xl bg-white/95 border border-[#E5D5B5] p-3.5 space-y-2 text-sm">
@@ -363,7 +360,7 @@ export function App() {
           </h2>
           <p className="font-serif italic text-base text-[#6E5D47] mb-10">
             {isVirtual
-              ? 'Transmisión en vivo desde el Salón del Reino'
+              ? 'Transmisión en vivo desde Zoom'
               : weddingData.venues.sectionSubtitle}
           </p>
 
