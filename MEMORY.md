@@ -2,20 +2,20 @@
 Memoria del proyecto entre sesiones. Máximo ~50 líneas.
 
 ## Estado actual
-- **Spec 001 actualizada y verificada** (`specs/001-wedding-invitation-valeria-ramiro/spec.md`).
-- **Tareas completadas (`5/5`)**: `T1` a `T5` marcadas `[x]` en `specs/001-wedding-invitation-valeria-ramiro/tasks.md`.
-- **Tests unitarios (`node --test`)**: `12/12` pruebas en verde en `tests/weddingLogic.test.js` y `tests/sanity.test.js` (`0` fallos).
+- **Spec 001 completada y verificada** (`specs/001-wedding-invitation-valeria-ramiro/spec.md`).
+- **Tareas completadas (`9/9`)**: `T1` a `T9` marcadas `[x]` en `tasks.md`.
+- **Tests unitarios (`node --test`)**: `24/24` pruebas en verde en `weddingLogic.test.js` y `sanity.test.js` (`0` fallos).
 - **Build de producción (`npm run build`)**: Compilación limpia con Vite v5.4.21 (`0` errores).
-- **Modalidades por URL (`getInvitationModality`)**:
-  * Presencial completa (`/`): Salón del Reino + Recepción Punta Brava, Código de Vestimenta (solo Damas y Caballeros, sin *"Estilo Formal"*), RSVP `"Hasta el 16 de Noviembre de 2026"` (`guestType: 'Presencial'`).
-  * Virtual Zoom (`?tipo=virtual` | `?mode=zoom`): Tarjeta Zoom debajo de la fecha, *"Consejos Bíblicos"* como título de sección sin hora repetida, sin aviso extra en Hero, sin Código de Vestimenta y sin sección/modal de Confirmar Asistencia.
-  * Solo Salón del Reino (`?tipo=ceremonia` | `?tipo=salon`): Solo Salón del Reino (sin Punta Brava), sin Cronograma del Día ni Código de Vestimenta, y RSVP hasta `16 de Noviembre de 2026` (`guestType: 'Salón del Reino'`).
-- **RSVP Google Sheets y Audio Oficial**: Endpoint `rsvp.googleAppsScriptWebhookUrl` en `src/config/weddingData.js`, envío `POST` (`mode: 'no-cors'`) desde `RsvpRestaurantModal.jsx`, y pista oficial `public/assets/wedding-song.mp3`.
-- **Verificación móvil (`375x812 px` en Chrome DevTools)**:
-  * Verificados `/`, `/?tipo=virtual`, `/?tipo=ceremonia` y `/?tipo=salon` con `0` errores de consola y `scrollWidth === 375`.
-  * Pantalla de entrada (`EnvelopeIntroOverlay.jsx`) sin *"Invitación Exclusiva"* ni línea central, con el sello actualizado `/assets/wax-seal-real.png` (`loading="eager"`, `decoding="sync"`), sin `drop-shadow` ni tap highlight rectangular en Safari/iOS.
-  * Día `11` y nombre del lugar *"Salón del Reino de Los Testigos de Jehová"* en dorado (`#9E7B3B`); subtítulo ajustado a *"TENDRÁN LUGAR EN"*.
+- **Enrutamiento universal y cupos asignados (`RF-8`)**:
+  * Función pura `resolveInvitationContext` soporta rutas de pathname (`/salon-1..3`, `/boda-1..4`), hash (`/#/salon-2`) y query params (`?cupos=X`, `?tipo=salon`), con precedencia de ruta, insensibilidad a mayúsculas y normalización defensiva (1..3 para salón, 1..4 para boda, por defecto 1 en `/`).
+  * `RsvpRestaurantModal` renderiza barra interactiva con botones táctiles `[ 1 ] [ 2 ] ...` bajo *"Total de personas que asistirán"*, resaltando selección en `#9E7B3B`.
+  * Si el invitado marca *"No podré asistir"*, la barra se oculta y envía `0` asistentes; si vuelve a *"Sí, asistiré"*, reaparece restablecida en `1`.
+- **Modalidades por URL y verificación móvil (`375x812 px` en Chrome DevTools)**:
+  * Presencial completa (`/`, `/boda-1..4`): Salón + Punta Brava, Cronograma, Vestimenta y RSVP con 1 a 4 cupos táctiles (`guestType: 'Presencial'`).
+  * Solo Salón (`/salon-1..3`): Salón del Reino con 1 a 3 cupos táctiles (`guestType: 'Salón del Reino'`), ocultando recepción, cronograma y vestimenta.
+  * Virtual Zoom (`/?tipo=virtual` | `?mode=zoom`): credenciales de Zoom intactas, sin vestimenta ni sección RSVP físico.
+  * Cero (`0`) errores en consola y ancho móvil exacto (`scrollWidth === 375`).
 
-## Decisiones (y por qué)
-- **Configuración única (`src/config/weddingData.js`)**: Centraliza lugares oficiales, horarios, `zoomConfig`, fecha límite RSVP, fotos (`public/assets/`), código de vestimenta y contacto RSVP por WhatsApp.
-- **Lógica pura separada (`src/logic/weddingLogic.js`)**: `calculateCountdown`, `validateRsvpSubmission`, `calculateScratchPercentage`, `isVirtualMode` y `formatZoomCredentialsCopyText` garantizan pruebas deterministas con `node --test` sin depender del DOM.
+## Decisiones arquitectónicas
+- **Configuración centralizada (`src/config/weddingData.js`)**: Lugares, horarios, webhook Google Sheets, WhatsApp y canciones sin UI flotante.
+- **Lógica de negocio pura (`src/logic/weddingLogic.js`)**: `resolveInvitationContext`, `validateRsvpSubmission`, `calculateCountdown`, `calculateScratchPercentage` y utilidades Zoom aisladas y cubiertas al 100% con tests unitarios independientes del DOM.

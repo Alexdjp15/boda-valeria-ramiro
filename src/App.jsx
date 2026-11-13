@@ -17,7 +17,8 @@ import { weddingData } from './config/weddingData.js';
 import {
   calculateCountdown,
   getInvitationModality,
-  formatZoomCredentialsCopyText
+  formatZoomCredentialsCopyText,
+  resolveInvitationContext
 } from './logic/weddingLogic.js';
 import { EnvelopeIntroOverlay } from './components/EnvelopeIntroOverlay.jsx';
 import { RsvpRestaurantModal } from './components/RsvpRestaurantModal.jsx';
@@ -44,8 +45,10 @@ function legacyCopyText(text) {
 }
 
 export function App() {
-  const modality =
-    typeof window !== 'undefined' ? getInvitationModality(window.location.search) : 'full';
+  const invitationContext = resolveInvitationContext(
+    typeof window !== 'undefined' ? window.location : null
+  );
+  const { modality, maxAllowedGuests } = invitationContext;
   const isVirtual = modality === 'virtual';
   const isCeremonyOnly = modality === 'ceremony';
   const activeRsvpDeadlineLabel = isCeremonyOnly
@@ -267,7 +270,7 @@ export function App() {
                   {weddingData.zoomConfig.cardTitle}
                 </h2>
                 <p className="font-serif italic text-sm text-[#6E5D47]">
-                  {weddingData.zoomConfig.title} · {weddingData.zoomConfig.hostLabel}
+                  {weddingData.zoomConfig.title}
                 </p>
                 <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#9E7B3B] font-semibold">
                   {weddingData.zoomConfig.timeScheduleLabel}
@@ -395,7 +398,7 @@ export function App() {
                 </h3>
               )}
               <p className="font-sans text-[11px] tracking-[0.18em] uppercase text-[#6E5D47]">
-                {weddingData.venues.ceremony.placePretext}{' '}
+                {isVirtual ? weddingData.zoomConfig.placePretext : weddingData.venues.ceremony.placePretext}{' '}
                 <strong className="font-semibold text-[#9E7B3B] block mt-1 text-sm">
                   {weddingData.venues.ceremony.venueName}
                 </strong>
@@ -577,6 +580,7 @@ export function App() {
           whatsappUrl={weddingData.rsvp.whatsappUrl}
           whatsappPhoneDisplay={weddingData.rsvp.whatsappPhoneDisplay}
           isVirtual={isVirtual}
+          maxAllowedGuests={invitationContext.maxAllowedGuests}
         />
       )}
     </div>

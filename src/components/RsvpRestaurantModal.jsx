@@ -16,15 +16,23 @@ export function RsvpRestaurantModal({
   deadlineLabel,
   webhookUrl,
   whatsappUrl,
-  whatsappPhoneDisplay
+  whatsappPhoneDisplay,
+  maxAllowedGuests = 1
 }) {
+  const safeMaxGuests = Math.max(
+    1,
+    Number.isInteger(maxAllowedGuests)
+      ? maxAllowedGuests
+      : parseInt(maxAllowedGuests, 10) || 1
+  );
   const { effectiveIsVirtual, guestType } = resolveRsvpGuestType(
     isVirtual,
-    typeof window !== 'undefined' ? window.location.search : ''
+    typeof window !== 'undefined' ? window.location : ''
   );
   const dialogRef = useRef(null);
   const [fullName, setFullName] = useState('');
   const [attending, setAttending] = useState('');
+  const [selectedGuestCount, setSelectedGuestCount] = useState(1);
   const [wishesMessage, setWishesMessage] = useState('');
   const [errors, setErrors] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,7 +83,11 @@ export function RsvpRestaurantModal({
   }, []);
 
   const handleSelectAttendance = (value) => {
+    if (value === attending) return;
     setAttending(value);
+    if (value === 'yes') {
+      setSelectedGuestCount(1);
+    }
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -85,12 +97,18 @@ export function RsvpRestaurantModal({
     e.preventDefault();
     if (isSubmitting) return;
 
-    const validation = validateRsvpSubmission({
-      fullName,
-      attending,
-      guestType,
-      wishesMessage
-    });
+    const effectiveGuestCount = attending === 'yes' ? selectedGuestCount : 0;
+
+    const validation = validateRsvpSubmission(
+      {
+        fullName,
+        attending,
+        guestType,
+        wishesMessage,
+        guestCount: effectiveGuestCount
+      },
+      safeMaxGuests
+    );
 
     if (!validation.isValid) {
       setErrors(validation.errors);
@@ -103,6 +121,7 @@ export function RsvpRestaurantModal({
       const payload = {
         fullName: validation.normalizedPayload.fullName,
         attending: validation.normalizedPayload.attending,
+        guestCount: effectiveGuestCount,
         guestType,
         isVirtual: effectiveIsVirtual,
         wishesMessage: validation.normalizedPayload.wishesMessage
@@ -265,6 +284,41 @@ export function RsvpRestaurantModal({
               </button>
             </div>
           </fieldset>
+
+          {attending === 'yes' && (
+            <div className="space-y-2 pt-1 text-center">
+              <label
+                id="guest-count-label"
+                className="block font-serif italic text-xs text-[#7A664B]"
+              >
+                Total de personas que asistirán
+              </label>
+              <div
+                role="group"
+                aria-labelledby="guest-count-label"
+                className="flex items-center justify-center gap-3"
+              >
+                {Array.from({ length: safeMaxGuests }, (_, i) => i + 1).map((num) => {
+                  const isSelected = selectedGuestCount === num;
+                  return (
+                    <button
+                      key={num}
+                      type="button"
+                      aria-pressed={isSelected}
+                      onClick={() => setSelectedGuestCount(num)}
+                      className={`min-w-[44px] min-h-[44px] px-4 py-2 rounded-xl font-serif text-base font-semibold border transition shadow-sm flex items-center justify-center ${
+                        isSelected
+                          ? 'bg-[#9E7B3B] border-[#9E7B3B] text-white'
+                          : 'bg-white border-[#C8A96B] text-[#7A664B] hover:bg-[#FAF4E8]'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div>
             <label htmlFor="rsvp-wishes" className="block font-serif text-sm font-semibold mb-1.5">
