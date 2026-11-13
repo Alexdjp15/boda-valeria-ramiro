@@ -118,9 +118,15 @@ export function RsvpRestaurantModal({
     setErrors([]);
 
     if (webhookUrl) {
+      const attendanceDisplay =
+        effectiveGuestCount > 0
+          ? `Sí (${effectiveGuestCount} ${effectiveGuestCount === 1 ? 'persona' : 'personas'})`
+          : 'No';
+
       const payload = {
         fullName: validation.normalizedPayload.fullName,
         attending: validation.normalizedPayload.attending,
+        attendanceText: attendanceDisplay,
         guestCount: effectiveGuestCount,
         guestType,
         isVirtual: effectiveIsVirtual,
